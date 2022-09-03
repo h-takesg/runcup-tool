@@ -62,7 +62,7 @@ export class StravaApi {
         return await this.callApiWithGet(url);
     }
 
-    public async listClubActivities(id: string, page = 1, per_page = 30) : Promise<Array<any>> {
+    public async listClubActivities(id: string, page = 1, per_page = 150) : Promise<Array<any>> {
         const url = `${this.urlHead}/clubs/${id}/activities?page=${page}&per_page=${per_page}`;
         return await this.callApiWithGet(url);
     }

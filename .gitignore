@@ -1,2 +1,5 @@
 authInfo.json
 gapi_auth.json
+period.json
+activities/*
+sampleResponse.json
