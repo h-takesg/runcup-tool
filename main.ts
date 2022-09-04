@@ -31,6 +31,9 @@ async function update(){
     const periodData = JSON.parse(Deno.readTextFileSync("./app/period.json"));
     const currentPeriod = periodData.find(e => e.startMs < now && now < e.endMs); // shallow copy
 
+    // 杯情報読み込み
+    const cupData = JSON.parse(Deno.readTextFileSync("./app/cupInfo.json"));
+
     // stravaデータ取得
     const strava : StravaApi = await StravaApi.build();
     const responseActivities = await strava.listClubActivities("took");
@@ -63,7 +66,7 @@ async function update(){
     if(currentPeriod.sumDistance != distanceKiloMeterSum){
         Logger.info("Update spreadsheet")
         const gapi = new GApi();
-        await gapi.setValue("1fvyuXc8Cwwd2Qpt8qnl57LXwSVqN6vWbkkNUFymRs-8", 0, 2, currentPeriod.columnNum, distanceKiloMeterSum);
+        await gapi.setValue(cupData.sheetId, 0, 2, currentPeriod.columnNum, distanceKiloMeterSum);
     }
 
     // ファイル書き込み
@@ -74,23 +77,18 @@ async function update(){
 }
 
 function newPeriod(){
+    const cupData = JSON.parse(Deno.readTextFileSync("./app/cupInfo.json"));
     const periodData = JSON.parse(Deno.readTextFileSync("./app/period.json"));
     const lastPeriod = periodData[periodData.length - 1];
-    const nameArray = [
-        "Sep1stWeek",
-        "Sep2ndWeek",
-        "Sep3rdWeek",
-        "Sep4thWeek",
-        "Sep5thWeek",
-    ]
-    const ms7days = 7 * 24 * 60 * 60 * 1000;
+    const nameArray = cupData.periodNames;
+    const msPeriodDays = cupData.periodDays * 24 * 60 * 60 * 1000;
     const activities = JSON.parse(Deno.readTextFileSync(`./app/activities/${lastPeriod.name}.json`));
     const lastActivity = activities[0];
 
     const newPeriod = {
         "name": nameArray[nameArray.findIndex(e => e === lastPeriod.name) + 1],
-        "startMs": lastPeriod.startMs + ms7days,
-        "endMs": lastPeriod.endMs + ms7days,
+        "startMs": lastPeriod.startMs + msPeriodDays,
+        "endMs": lastPeriod.endMs + msPeriodDays,
         "startActivity": lastActivity,
         "columnNum": lastPeriod.columnNum + 1,
         "activityCount": 0,
