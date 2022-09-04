@@ -29,6 +29,8 @@ switch (subcommand) {
         break;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
 async function update(){
     // 期間データ読み込み
     const now = Date.now();
@@ -81,14 +83,18 @@ async function update(){
 }
 
 function newPeriod(){
+    // 設定ファイル読み込み
     const cupData = JSON.parse(Deno.readTextFileSync("./app/cupInfo.json"));
     const periodData = JSON.parse(Deno.readTextFileSync("./app/period.json"));
     const lastPeriod = periodData[periodData.length - 1];
     const nameArray = cupData.periodNames;
+
+    // 期間データ準備
     const msPeriodDays = cupData.periodDays * 24 * 60 * 60 * 1000;
     const activities = JSON.parse(Deno.readTextFileSync(`./app/activities/${lastPeriod.name}.json`));
     const lastActivity = activities[0];
 
+    // 新期間データ生成
     const newPeriod = {
         "name": nameArray[nameArray.findIndex(e => e === lastPeriod.name) + 1],
         "startMs": lastPeriod.endMs + 1,
@@ -99,6 +105,7 @@ function newPeriod(){
         "sumDistance": 0
     }
 
+    // 期間データファイルに書き込み
     periodData.push(newPeriod);
     Deno.writeTextFileSync("./app/period.json", JSON.stringify(periodData, null, 4));
 }
