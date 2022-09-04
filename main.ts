@@ -21,6 +21,7 @@ switch (subcommand) {
 
     case "list":
         await listActivities(Deno.args[1]);
+        break;
 
     default:
         console.log("run update / run newPeriod");
