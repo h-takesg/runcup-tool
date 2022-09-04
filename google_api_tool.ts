@@ -1,14 +1,13 @@
 import { GoogleAPI } from "https://deno.land/x/google_deno_integration/mod.ts";
+import { GoogleCertData } from "./dataTypes.ts";
 import {Logger} from "./logger.ts";
 
 class GApi {
     gapi;
 
     constructor(){
-        const certStr = Deno.readFileSync("./app/gapi_auth.json");
-        const decoder = new TextDecoder("utf-8");
-        const certStrDec = decoder.decode(certStr);
-        const certData = JSON.parse(certStrDec);
+        const certStr = Deno.readTextFileSync("./app/gapi_auth.json");
+        const certData: GoogleCertData = JSON.parse(certStr);
 
         this.gapi = new GoogleAPI({
             email: certData.client_email,

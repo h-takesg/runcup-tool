@@ -1,4 +1,22 @@
+import { StravaCertData } from "./dataTypes.ts";
 import {Logger} from "./logger.ts";
+
+export type SummaryActivity = {
+    resource_state: number;
+    athlete: {
+        resource_state: number;
+        firstname: string;
+        lastname: string;
+    }
+    name: string;
+    distance: number;
+    moving_time: number;
+    elapsed_time: number;
+    total_elevation_gain: number;
+    type: string;
+    sport_type: string;
+    workout_type: number;
+};
 
 export class StravaApi {
     ACCESSTOKEN: string;
@@ -19,8 +37,7 @@ export class StravaApi {
     }
 
     private async refreshLatestAccessToken() {
-        const certStr = Deno.readTextFileSync("./app/authInfo.json");
-        let certData = JSON.parse(certStr);
+        const certData: StravaCertData = JSON.parse(Deno.readTextFileSync("./app/authInfo.json"));
         
         if(certData.expiresAt - Date.now()/1000 > 1 * 60 * 60){
             Logger.info("No need to refresh access token.")
@@ -62,7 +79,7 @@ export class StravaApi {
         return await this.callApiWithGet(url);
     }
 
-    public async listClubActivities(id: string, page = 1, per_page = 150) : Promise<Array<any>> {
+    public async listClubActivities(id: string, page = 1, per_page = 150) : Promise<Array<SummaryActivity>> {
         const url = `${this.urlHead}/clubs/${id}/activities?page=${page}&per_page=${per_page}`;
         return await this.callApiWithGet(url);
     }
