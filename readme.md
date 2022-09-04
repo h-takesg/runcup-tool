@@ -1,6 +1,11 @@
 # strava-api-tool
 ## run
 `.\run.bat`でmain.tsを実行する．
+|subcommand|description|
+|-|-|
+|`update`|現在の集計期間の走行距離を取得し，スプシを更新する|
+|`newPeriod`|集計期間を切り替える|
+|`list ${clubid}`|指定したidのクラブのアクティビティを直近150件とってくる|
 
 ## init
 1つ目の集計期間内に実行することを想定
