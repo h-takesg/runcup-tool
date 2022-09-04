@@ -83,5 +83,5 @@ crontabの例
 * 9月の月曜0時0分毎に期間切り替え実行
 ```
 * 10-23 * 9 * sleep 10; /home/took/runcup/run.sh update
-00 00 * 9 1 /home/took/runup/run.sh newPeriod
+00 00 * 9 1 /home/took/runcup/run.sh newPeriod
 ```
