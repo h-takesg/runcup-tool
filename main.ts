@@ -19,6 +19,9 @@ switch (subcommand) {
         newPeriod();
         break;
 
+    case "list":
+        await listActivities(Deno.args[1]);
+
     default:
         console.log("run update / run newPeriod");
         Deno.exit(1);
@@ -36,7 +39,7 @@ async function update(){
 
     // stravaデータ取得
     const strava : StravaApi = await StravaApi.build();
-    const responseActivities = await strava.listClubActivities("took");
+    const responseActivities = await strava.listClubActivities(cupData.clubId);
 
     // 集計期間アクティビティを抽出
     const startActivity = currentPeriod.startActivity;
@@ -97,4 +100,12 @@ function newPeriod(){
 
     periodData.push(newPeriod);
     Deno.writeTextFileSync("./app/period.json", JSON.stringify(periodData, null, 4));
+}
+
+async function listActivities(clubId: string){
+    // stravaデータ取得
+    const strava : StravaApi = await StravaApi.build();
+    const responseActivities = await strava.listClubActivities(clubId);
+
+    Deno.writeTextFileSync("./app/removeme.activities.json", JSON.stringify(responseActivities, null, 4));
 }
