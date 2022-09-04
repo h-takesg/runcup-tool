@@ -9,6 +9,14 @@
 
 ## init
 1つ目の集計期間内に実行することを想定
+
+### タイムゾーン設定
+Asia/Tokyoにする
+
+### 依存ソフト導入
+* docker
+* (optional) git
+
 ### strava API の認証データを置く
 `./authInfo.json`
 ```
