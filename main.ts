@@ -91,7 +91,7 @@ function newPeriod(){
 
     const newPeriod = {
         "name": nameArray[nameArray.findIndex(e => e === lastPeriod.name) + 1],
-        "startMs": lastPeriod.startMs + msPeriodDays,
+        "startMs": lastPeriod.endMs + 1,
         "endMs": lastPeriod.endMs + msPeriodDays,
         "startActivity": lastActivity,
         "columnNum": lastPeriod.columnNum + 1,
