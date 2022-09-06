@@ -25,7 +25,7 @@ switch (subcommand) {
         break;
 
     default:
-        console.log("run update / run newPeriod / run list");
+        console.log("run update / run newPeriod / run list <id>");
         Deno.exit(1);
         break;
 }
@@ -52,14 +52,14 @@ async function update(){
     const responseActivities = await strava.listClubActivities(cupData.clubId);
 
     // 集計期間アクティビティを抽出
-    const startActivity = currentPeriod.startActivity;
-    const oldestActivityIndex = responseActivities.findIndex((e => equal(e, startActivity)));
-    const validActivities = responseActivities.slice(0,oldestActivityIndex);
+    const startActivity         = currentPeriod.startActivity;
+    const oldestActivityIndex   = responseActivities.findIndex((e => equal(e, startActivity)));
+    const validActivities       = responseActivities.slice(0,oldestActivityIndex);
 
     // アクティビティ数と期間内総走行距離を計算
-    const activityCount = validActivities.length;
-    const distanceMeterSum = validActivities.reduce(((a, e) => a + e.distance), 0);
-    const distanceKiloMeterSum = distanceMeterSum / 1000;
+    const activityCount         = validActivities.length;
+    const distanceMeterSum      = validActivities.reduce(((a, e) => a + e.distance), 0);
+    const distanceKiloMeterSum  = distanceMeterSum / 1000;
 
     // 結果出力
     console.log(`Activities: ${activityCount}`);
@@ -91,10 +91,10 @@ async function update(){
 
 function newPeriod(){
     // 設定ファイル読み込み
-    const cupData: CupInfo = JSON.parse(Deno.readTextFileSync("./app/cupInfo.json"));
+    const cupData: CupInfo              = JSON.parse(Deno.readTextFileSync("./app/cupInfo.json"));
     const periodData: Array<PeriodData> = JSON.parse(Deno.readTextFileSync("./app/period.json"));
     const lastPeriod = periodData[periodData.length - 1];
-    const nameArray = cupData.periodNames;
+    const nameArray  = cupData.periodNames;
 
     // 期間データ準備
     const msPeriodDays = cupData.periodDays * 24 * 60 * 60 * 1000;
@@ -103,13 +103,13 @@ function newPeriod(){
 
     // 新期間データ生成
     const newPeriod: PeriodData = {
-        "name": nameArray[nameArray.findIndex(e => e === lastPeriod.name) + 1],
-        "startMs": lastPeriod.endMs + 1,
-        "endMs": lastPeriod.endMs + msPeriodDays,
-        "startActivity": lastActivity,
-        "columnNum": lastPeriod.columnNum + 1,
-        "activityCount": 0,
-        "sumDistance": 0
+        name          : nameArray[nameArray.findIndex(e => e === lastPeriod.name) + 1],
+        startMs       : lastPeriod.endMs + 1,
+        endMs         : lastPeriod.endMs + msPeriodDays,
+        startActivity : lastActivity,
+        columnNum     : lastPeriod.columnNum + 1,
+        activityCount : 0,
+        sumDistance   : 0
     }
 
     // 期間データファイルに書き込み

@@ -16,6 +16,7 @@ class GApi {
         });
     }
 
+    // spreadsheetの指定のセルに値を書き込む
     public setValue(id: string, sheet: number, row: number, column: number, value: string | number){
         const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${id}:batchUpdate`
 
