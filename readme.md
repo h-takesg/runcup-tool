@@ -1,4 +1,7 @@
-# strava-api-tool
+# これは
+Stravaのクラブから期間ごとの走行距離を集計し，GoogleSpreadsheetに書き込むアプリ
+
+# つかいかた
 ## run
 `.\run.bat`でmain.tsを実行する．
 |subcommand|description|
