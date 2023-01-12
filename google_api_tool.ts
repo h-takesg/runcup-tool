@@ -1,4 +1,5 @@
 import { GoogleAPI } from "https://deno.land/x/google_deno_integration/mod.ts";
+import { buildUrl } from "https://deno.land/x/url_builder/mod.ts";
 import {Logger} from "./logger.ts";
 
 class GApi {
@@ -55,6 +56,63 @@ class GApi {
         }
 
         const response = this.gapi.post(endpoint,requestData);
+        return response;
+    }
+
+    public setValues(id: string, sheetname: string, topRow: number, leftColumn: number, values: (number|string)[][]){
+        const rowSize = values.length;
+        const colSize = values[0].length;
+
+        const rangeString = `\'${sheetname}\'!R${topRow}C${leftColumn}:R${topRow+rowSize}C${leftColumn+colSize}`;
+
+        const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/${rangeString}`;
+        
+        const builtUrl = buildUrl(endpoint,{
+            queryParams: {
+                valueInputOption: "RAW",
+                includeValuesInResponse: false,
+                responseValueRenderOption: "FORMATTED_VALUE",
+                responseDateTimeRenderOption: "FORMATTED_STRING"
+            }
+        })
+
+        const requestBody = {
+            "majorDimension": "ROWS",
+            "range": rangeString,
+            "values": values
+        }
+
+        const response = this.gapi.put(builtUrl, requestBody);
+
+        return response;
+    }
+
+    // 挿入するデータを対角線で折り返した順に指定する
+    public setValuesVertical(id: string, sheetname: string, topRow: number, leftColumn: number, values: (number|string)[][]){
+        const colSize = values.length;
+        const rowSize = values[0].length;
+
+        const rangeString = `\'${sheetname}\'!R${topRow}C${leftColumn}:R${topRow+rowSize}C${leftColumn+colSize}`;
+
+        const endpoint = `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/${rangeString}`;
+        
+        const builtUrl = buildUrl(endpoint,{
+            queryParams: {
+                valueInputOption: "RAW",
+                includeValuesInResponse: false,
+                responseValueRenderOption: "FORMATTED_VALUE",
+                responseDateTimeRenderOption: "FORMATTED_STRING"
+            }
+        })
+
+        const requestBody = {
+            "majorDimension": "COLUMNS",
+            "range": rangeString,
+            "values": values
+        }
+
+        const response = this.gapi.put(builtUrl, requestBody);
+
         return response;
     }
 }
