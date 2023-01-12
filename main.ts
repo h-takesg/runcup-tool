@@ -98,7 +98,9 @@ function newPeriod(){
     const nameArray = cupData.periodNames;
     const msPeriodDays = cupData.periodDays * 24 * 60 * 60 * 1000;
     const activities = JSON.parse(Deno.readTextFileSync(`./app/activities/${lastPeriod.name}.json`));
-    const lastActivity = activities[0];
+    let allActivities = JSON.parse(Deno.readTextFileSync("/app/activities/all.json"));
+    allActivities = activities.concat(allActivities);
+    const lastActivity = allActivities[0];
 
     const newPeriod = {
         "name": nameArray[nameArray.findIndex(e => e === lastPeriod.name) + 1],
@@ -112,6 +114,7 @@ function newPeriod(){
 
     periodData.push(newPeriod);
     Deno.writeTextFileSync("./app/period.json", JSON.stringify(periodData, null, 4));
+    Deno.writeTextFileSync("./app/activities/all.json", JSON.stringify(allActivities, null, 4));
 }
 
 async function listActivities(clubId: string){
