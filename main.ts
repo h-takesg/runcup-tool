@@ -37,6 +37,9 @@ async function update(){
 
     // 杯情報読み込み
     const cupData = JSON.parse(Deno.readTextFileSync("./app/cupInfo.json"));
+    
+    // アスリート情報読み込み
+    const athletes = JSON.parse(Deno.readTextFileSync("./app/athletes.json"));
 
     // stravaデータ取得
     const strava : StravaApi = await StravaApi.build();
@@ -47,37 +50,45 @@ async function update(){
     const oldestActivityIndex = responseActivities.findIndex((e => equal(e, startActivity)));
     const validActivities = responseActivities.slice(0,oldestActivityIndex);
 
-    // アクティビティ数と期間内総走行距離を計算
-    const activityCount = validActivities.length;
-    const distanceMeterSum = validActivities.reduce(((a : number,e) => a + parseFloat(e.distance)), 0.0);
-    const distanceKiloMeterSum = distanceMeterSum / 1000;
+    // 名前ごとの期間内総走行距離を計算
+    const athletesDistances = validActivities.reduce(
+        (result, currentActivity) => {
+            const athleteName = currentActivity.athlete.lastname + " " + currentActivity.athlete.firstname;
+            if(Object.keys(result).includes(athleteName)){
+                result[athleteName] += currentActivity.distance;
+            }else{
+                result[athleteName] = currentActivity.distance;
+            }
+            return result;
+        },
+        {}
+    );
 
-    // 結果出力
-    console.log(`Activities: ${activityCount}`);
-    console.log(`Distance: ${distanceKiloMeterSum}`);
-
-    // 異常検知
-    if(currentPeriod.activityCount > activityCount || currentPeriod.sumDistance > distanceKiloMeterSum){
-        Logger.critical("Number decrease!");
-        Logger.critical("currentPeriod");
-        Logger.critical(JSON.stringify(currentPeriod, null, 4));
-        Logger.critical("activityCount and distanceKiloMeterSum");
-        Logger.critical([activityCount, distanceKiloMeterSum]);
-        Deno.exit(1);
+    // 既存リストに合わせてソート
+    let sortedDistances = athletes.map(x => {return {"name": x, "distance": 0}});
+    for(let athlete of Object.keys(athletesDistances)){
+        const i = sortedDistances.findIndex(x => athlete == x.name);
+        if(i > -1){
+            sortedDistances[i].distance = athletesDistances[athlete];
+        }else{
+            sortedDistances.push({"name":athlete, "distance": athletesDistances[athlete]});
+        }
     }
 
+    // 書き込み用データ作成
+    const newAthletes = sortedDistances.map(x => x.name);
+    const newAthletesDistances = sortedDistances.map(x => x.distance);
+    
     // spreadsheet 書き込み
-    if(currentPeriod.sumDistance != distanceKiloMeterSum){
-        Logger.info("Update spreadsheet")
-        const gapi = new GApi();
-        await gapi.setValue(cupData.sheetId, 0, 2, currentPeriod.columnNum, distanceKiloMeterSum);
-    }
+    Logger.info("Update spreadsheet")
+    const gapi = new GApi();
+    await gapi.setValuesVertical(cupData.sheetId, "master", 2, 1, [newAthletes]);
+    await gapi.setValuesVertical(cupData.sheetId, "master", 2, currentPeriod.columnNum, [newAthletesDistances]);
 
     // ファイル書き込み
-    currentPeriod.activityCount = activityCount;
-    currentPeriod.sumDistance = distanceKiloMeterSum;
-    Deno.writeTextFileSync("./app/period.json", JSON.stringify(periodData, null, 4));
     Deno.writeTextFileSync(`./app/activities/${currentPeriod.name}.json`, JSON.stringify(validActivities, null, 4));
+    Deno.writeTextFileSync(`./app/athletes.json`, JSON.stringify(newAthletes, null, 4));
+
 }
 
 function newPeriod(){
